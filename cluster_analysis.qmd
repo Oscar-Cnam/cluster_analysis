@@ -195,8 +195,8 @@ c1 : il utilise rbinom pour générer 600 chiffres avec une proba de succès de 
 
 c2 : si la couleur du point est noir alors on applique une proba plus importante au succès 1 sinon on applique une proba plus importante au succès 2.
 
-```{r}
 
+```{r}
 # Creating discrete variables
 # Note for poLCA and clustMD, coding must start at 1.
 
