@@ -14,9 +14,7 @@ bibliography: references.bib
 
 Ce fichier **Quarto** utilise cet article @clusterAnalysis, l'objectif est de reproduire les résultats obtenus sur le sujet du clustering. Dans cette étude, on explore les méthodes de clustering en se basant sur des données simulées, en ayant pour objectif de reconstituer le clustering avec des méthodes statistiques.
 
-# Génération des données simulées
-
-### Importation des packages
+# Importation des packages utilisés
 
 ```{r}
 #| message: false
@@ -36,9 +34,42 @@ library(NbClust)
 library(mclust)
 ```
 
-##### Répartition des points simulés
+# Création d'une simulation de données
+
+La génération des données simulées va permettre de tester les méthodes de clustering sur des données dont on connaît la répartition, sur lesquels on a nous même défini les groupes. On pourra ainsi comparer les groupes théoriques aux groupes trouvés avec les différentes fonctions.
+
+## Génération des données
+
+Pour simuler les données, on définit une graine (seed) pour la reproductibilité.
+
+On détermine le nombre d'individus dans chaque groupe. On doit avoir la répartition suivante : 
+
+* **Groupe 1** : 30%
+* **Groupe 2** : 40%
+* **Groupe 3** : 30%
+
+Ensuite, on fixe les coordonnées des moyennes de chaque groupe, ce sont en fait les points moyens théoriques pour chaque groupe. Pour créer cela, on insère les coordonnées dans une matrice (2,3)
+
+* **Groupe 1** : (0,0)
+* **Groupe 2** : (3,5)
+* **Groupe 3** : (0,6)
+
+Une fois les centres des groupes définis, il faut déterminer comment les individus vont s'éparpiller autour de ces centres. C'est le rôle des matrices de covariance. 
+
+* **`Sigma.sph = diag(c(1, 1))`** : Cette ligne crée une matrice de dispersion en forme circulaire. Concrètement, les points s'écarteront de la même manière dans toutes les directions.
+* **`Sigma.ell = matrix(...)`** : Cette ligne crée une matrice de dispersion en forme elliptique. Les valeurs choisies font que le nuage de points sera étiré.
+
+On génère aléatoirement le cluster théoriques de 600 individus en fonction des spécificités de la répartition des groupes, c'est à dire que sur nos 600 individus, l'objectif de la fonction sample() est de générer 30% de 1 (Groupe 1), 40% de 2 (Groupe 2), 30% de 3 (Groupe 3).
+
+La dernière étape place les 600 individus sur le graphique, fonction de leur groupe :
+
+* **Pour chaque individu (de 1 à 600)**, on regarde à quel groupe il appartient (`cl[i]`).
+* On utilise la fonction `rmvnorm()` qui génère des points aléatoires selon une Loi Normale avec une condition `ifelse` :
+    * **S'il est dans le groupe 3** : on lui donne les coordonnées du centre du groupe 3 et on lui applique la dispersion en forme d'ellipse.
+    * **Sinon (s'il est dans le groupe 1 ou 2)** : on lui donne les coordonnées de son groupe et on lui applique la dispersion en forme circulaire.
 
 ```{r}
+#| echo: false
 set.seed(288)
 
 # Creating continuous variables
@@ -52,7 +83,12 @@ for(i in 1:600)
 {
   ifelse(cl[i] == 3, X[i,]<-rmvnorm(1, mu[,3], Sigma.ell), X[i,]<-rmvnorm(1, mu[,cl[i]], Sigma.sph))
 }
-eqscplot(X, col = "gray1", pch = 18)
+```
+
+## Visualisation des données
+
+```{r}
+eqscplot(X, col = "navy", pch = 20, main = "Répartition des points simulés dans un plan")
 ```
 
 ##### Répartition des points simulés - version ggplot
