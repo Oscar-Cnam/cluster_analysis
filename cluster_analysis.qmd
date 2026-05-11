@@ -1,9 +1,12 @@
 ---
 title: "Clustering"
-author: "Oscar JOSEPH--GENESLAY"
-toc: true
+author: "Arsène MBABEH - Raphaël PÉNÉ - Oscar JOSEPH--GENESLAY"
 number-sections: true
-format: pdf
+format:
+  pdf:
+    template: template.tex
+    pdf-engine: xelatex
+toc: false
 css: style.css
 lang: fr
 editor: visual
@@ -43,31 +46,31 @@ La génération des données simulées va permettre de tester les méthodes de c
 
 Pour simuler les données, on définit une graine (seed) pour la reproductibilité.
 
-On détermine le nombre d'individus dans chaque groupe. On doit avoir la répartition suivante : 
+On détermine le nombre d'individus dans chaque groupe. On doit avoir la répartition suivante :
 
-* **Groupe 1** : 30%
-* **Groupe 2** : 40%
-* **Groupe 3** : 30%
+- **Groupe 1** : 30%
+- **Groupe 2** : 40%
+- **Groupe 3** : 30%
 
 Ensuite, on fixe les coordonnées des moyennes de chaque groupe, ce sont en fait les points moyens théoriques pour chaque groupe. Pour créer cela, on insère les coordonnées dans une matrice (2,3)
 
-* **Groupe 1** : (0,0)
-* **Groupe 2** : (3,5)
-* **Groupe 3** : (0,6)
+- **Groupe 1** : (0,0)
+- **Groupe 2** : (3,5)
+- **Groupe 3** : (0,6)
 
-Une fois les centres des groupes définis, il faut déterminer comment les individus vont s'éparpiller autour de ces centres. C'est le rôle des matrices de covariance. 
+Une fois les centres des groupes définis, il faut déterminer comment les individus vont s'éparpiller autour de ces centres. C'est le rôle des matrices de covariance.
 
-* **`Sigma.sph = diag(c(1, 1))`** : Cette ligne crée une matrice de dispersion en forme circulaire. Concrètement, les points s'écarteront de la même manière dans toutes les directions.
-* **`Sigma.ell = matrix(...)`** : Cette ligne crée une matrice de dispersion en forme elliptique. Les valeurs choisies font que le nuage de points sera étiré.
+- **`Sigma.sph = diag(c(1, 1))`** : Cette ligne crée une matrice de dispersion en forme circulaire. Concrètement, les points s'écarteront de la même manière dans toutes les directions.
+- **`Sigma.ell = matrix(...)`** : Cette ligne crée une matrice de dispersion en forme elliptique. Les valeurs choisies font que le nuage de points sera étiré.
 
 On génère aléatoirement le cluster théoriques de 600 individus en fonction des spécificités de la répartition des groupes, c'est à dire que sur nos 600 individus, l'objectif de la fonction sample() est de générer 30% de 1 (Groupe 1), 40% de 2 (Groupe 2), 30% de 3 (Groupe 3).
 
 La dernière étape place les 600 individus sur le graphique, fonction de leur groupe :
 
-* **Pour chaque individu (de 1 à 600)**, on regarde à quel groupe il appartient (`cl[i]`).
-* On utilise la fonction `rmvnorm()` qui génère des points aléatoires selon une Loi Normale avec une condition `ifelse` :
-    * **S'il est dans le groupe 3** : on lui donne les coordonnées du centre du groupe 3 et on lui applique la dispersion en forme d'ellipse.
-    * **Sinon (s'il est dans le groupe 1 ou 2)** : on lui donne les coordonnées de son groupe et on lui applique la dispersion en forme circulaire.
+- **Pour chaque individu (de 1 à 600)**, on regarde à quel groupe il appartient (`cl[i]`).
+- On utilise la fonction `rmvnorm()` qui génère des points aléatoires selon une Loi Normale avec une condition `ifelse` :
+  - **S'il est dans le groupe 3** : on lui donne les coordonnées du centre du groupe 3 et on lui applique la dispersion en forme d'ellipse.
+  - **Sinon (s'il est dans le groupe 1 ou 2)** : on lui donne les coordonnées de son groupe et on lui applique la dispersion en forme circulaire.
 
 ```{r}
 #| echo: false
@@ -189,14 +192,24 @@ as_tibble(X) %>% ggplot(aes(x = V1, y=V2)) +
 graph1
 ```
 
-## Création des variables discrètes
+# Création des variables discrètes
 
-c1 : il utilise rbinom pour générer 600 chiffres avec une proba de succès de 0.5, +1 pour mettre les valeurs à 1 ou 2
+## Génération des données discrètes
 
-c2 : si la couleur du point est noir alors on applique une proba plus importante au succès 1 sinon on applique une proba plus importante au succès 2.
+Cette partie recréer les quatre variables discrètes (trois binaires et une ternaire) qui accompagnent les variables continues dans le jeu de données simulé de l'article.
 
+Voici le détail de la construction de chaque variable pour refléter la structure des groupes (où le groupe 1 correspond au groupe Noir, le groupe 2 au Rouge et le groupe 3 au Vert) :
+
+- Variable c1 : Elle est simulée avec une probabilité uniforme de 0.5 d'obtenir un succès (valeur 2) ou un échec (valeur 1), indépendamment du groupe d'appartenance de l'observation.
+
+- Variable c2 : Il s'agit d'une variable binaire conçue pour avoir une probabilité de succès asymétrique. Le succès est beaucoup plus probable (0.9) pour les groupes 2 et 3 que pour le groupe 1 (0.1).
+
+- Variable c3 : C'est la variable ternaire (modalités 1, 2 et 3) de l'étude. Sa distribution est paramétrée pour qu'une observation ait une plus forte probabilité d'obtenir un 1 si elle est dans le groupe noir, un 2 dans le groupe rouge et un 3 dans le groupe vert.
+
+- Variable c4 : C'est une variable binaire dont la probabilité de succès a été configurée pour être nettement supérieure dans le groupe rouge (probabilité de 0.8).
 
 ```{r}
+#| echo: false
 # Creating discrete variables
 # Note for poLCA and clustMD, coding must start at 1.
 
@@ -230,9 +243,10 @@ head(vars)
 
 ```
 
-##### Fréquence des modalités dans chaque groupe et variable des données
+## Visualisation de la fréquence des modalités
 
 ```{r}
+#| echo: false
 df_plot <- vars[, 3:6] %>% 
   as_tibble() %>% 
   mutate(cl = as.factor(cl)) %>% 
@@ -526,3 +540,5 @@ plot(m1)
 # cross-classification table
 #table(cl, m1$class)
 ```
+
+# Bibliographie
