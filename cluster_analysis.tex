@@ -265,13 +265,13 @@ utilisés}\label{importation-des-packages-utilisuxe9s}
 \FunctionTok{library}\NormalTok{(gplots)}
 \FunctionTok{library}\NormalTok{(tidyverse)}
 \FunctionTok{library}\NormalTok{(plotly)}
-\FunctionTok{library}\NormalTok{(tidyverse)}
 \FunctionTok{library}\NormalTok{(scales)}
 \FunctionTok{library}\NormalTok{(factoextra)}
 \FunctionTok{library}\NormalTok{(NbClust)}
 \FunctionTok{library}\NormalTok{(mclust)}
 \FunctionTok{library}\NormalTok{(kableExtra)}
 \FunctionTok{library}\NormalTok{(kStatistics)}
+\FunctionTok{library}\NormalTok{(gridExtra)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -546,36 +546,17 @@ Description de l'algorithme d'Hartigan-Wong pour la méthode des kmeans.
 \hline
 \end{array}\]
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(gridExtra)}
-\NormalTok{cluster1 }\OtherTok{=} \FunctionTok{kmeans}\NormalTok{ (vars [,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{], }\DecValTok{1}\NormalTok{, }\AttributeTok{nstart =} \DecValTok{50}\NormalTok{) }
-\NormalTok{cluster2 }\OtherTok{=} \FunctionTok{kmeans}\NormalTok{ (vars [,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{], }\DecValTok{2}\NormalTok{, }\AttributeTok{nstart =} \DecValTok{50}\NormalTok{) }\CommentTok{\# dans k1 il y a 181 individus / dans k2 il y en a 419}
-\NormalTok{cluster3 }\OtherTok{=} \FunctionTok{kmeans}\NormalTok{ (vars [,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{], }\DecValTok{3}\NormalTok{, }\AttributeTok{nstart =} \DecValTok{50}\NormalTok{)}
+Nous avons calculé les clusters avec cette méthode en définissant le
+nombre de cluster \(k = 3\). Dans ce résultat, nous avons donc
+l'appartenance de chaque point à un cluster. Ensuite, on reprend le
+nuage de dispersion des points simulés et on leur applique les couleurs
+des clusters calculés. On compare les deux graphiques pour avoir le
+graphique parfait (simulé) et le graphique avec les clusters calculés.
 
-\FunctionTok{library}\NormalTok{(tidyverse)}
-\CommentTok{\# Point moyen : moyenne\_1 \& moyenne\_2}
-\FunctionTok{as\_tibble}\NormalTok{(vars[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{]) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{summarise}\NormalTok{(}\AttributeTok{moyenne\_1 =} \FunctionTok{mean}\NormalTok{(V1),}
-                         \AttributeTok{moyenne\_2 =} \FunctionTok{mean}\NormalTok{(V2),}
-                         \AttributeTok{Variance =}\NormalTok{ (}\FunctionTok{var}\NormalTok{(V1) }\SpecialCharTok{+} \FunctionTok{var}\NormalTok{(V2)) }\SpecialCharTok{*} \DecValTok{599} \CommentTok{\# Somme des distances euclidiennes par rapport au p.m,}
-\NormalTok{                         ) }
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-# A tibble: 1 x 3
-  moyenne_1 moyenne_2 Variance
-      <dbl>     <dbl>    <dbl>
-1      1.18      3.79    6481.
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{as\_tibble}\NormalTok{(X) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ V1, }\AttributeTok{y=}\NormalTok{V2)) }\SpecialCharTok{+} \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{color =}\NormalTok{ cluster3}\SpecialCharTok{$}\NormalTok{cluster) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+} \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"Représentation des variables continues en fonction des groupes prédéfinis"}\NormalTok{) }\OtherTok{{-}\textgreater{}}\NormalTok{ graph2}
-
-\FunctionTok{grid.arrange}\NormalTok{(graph1, graph2, }\AttributeTok{nrow =} \DecValTok{1}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
+On peut voir que la partie du haut au niveau du croisement entre les
+clusters 2 et 3, la méthode des kmeans avec l'algorithme d'Hartigan-Wong
+arrive mal à définir l'appartenance au cluster puisqu'il fait des
+erreurs.
 
 \pandocbounded{\includegraphics[keepaspectratio]{cluster_analysis_files/figure-pdf/unnamed-chunk-13-1.pdf}}
 
@@ -612,23 +593,23 @@ Description de l'algorithme d'Hartigan-Wong pour la méthode des kmeans.
 \end{Shaded}
 
 \begin{verbatim}
-  [1] 1 3 1 3 1 1 2 1 1 2 3 2 3 1 2 2 1 1 1 1 2 2 3 1 3 1 1 1 1 3 3 2 3 3 1 1 3
- [38] 3 1 3 1 2 1 3 1 2 3 1 3 1 2 3 1 1 3 3 1 2 1 1 3 3 2 2 2 2 2 1 3 3 2 1 1 2
- [75] 3 2 2 3 2 1 1 1 3 3 1 2 2 3 1 3 2 2 3 2 3 3 1 1 1 2 1 3 1 2 1 1 1 1 3 2 1
-[112] 1 1 2 3 3 2 1 1 2 3 1 1 3 1 2 2 1 3 1 2 1 2 3 1 1 1 1 3 2 1 1 3 1 1 2 3 3
-[149] 2 2 2 1 2 3 2 3 2 1 2 2 2 2 1 2 1 2 1 3 1 2 2 3 3 3 3 1 3 2 3 1 2 1 3 1 1
-[186] 1 3 2 1 1 2 3 1 1 1 1 2 3 2 1 1 1 1 3 2 3 1 1 1 1 1 3 3 2 1 1 1 2 1 1 1 2
-[223] 1 1 1 2 2 1 1 1 1 3 3 1 1 2 2 2 2 1 1 1 1 2 2 1 3 2 3 2 1 2 2 2 1 1 1 1 3
-[260] 1 2 3 3 1 1 2 3 3 3 1 3 1 1 3 3 1 2 3 2 3 1 3 2 2 1 1 1 1 2 1 1 2 2 1 3 3
-[297] 2 1 1 3 3 1 2 3 3 3 3 2 1 3 1 1 1 1 3 3 2 1 1 1 1 2 3 2 3 1 1 2 1 1 2 3 3
-[334] 2 3 3 1 1 1 1 1 1 2 3 1 1 2 1 2 2 1 2 2 1 1 3 1 3 1 2 3 3 3 3 3 1 3 1 2 2
-[371] 1 2 3 1 1 2 1 1 1 3 1 3 3 2 1 3 3 1 2 2 2 1 1 1 3 1 3 1 1 1 1 2 3 3 2 1 2
-[408] 1 1 2 3 3 3 3 1 2 3 2 2 1 3 2 3 1 3 2 1 2 3 3 1 3 1 2 2 2 3 1 1 1 1 2 1 1
-[445] 2 1 2 1 1 1 1 1 1 1 3 3 3 1 2 1 3 3 3 3 3 3 2 3 1 1 3 2 1 3 1 1 1 1 3 3 1
-[482] 2 1 2 1 1 1 1 2 2 3 1 1 2 1 3 3 2 3 2 3 1 2 3 1 2 1 1 2 1 3 1 2 3 2 1 1 3
-[519] 1 1 2 1 3 3 3 2 1 3 3 3 1 1 1 1 3 3 2 1 1 3 2 1 3 2 2 3 2 1 3 2 1 2 2 1 2
-[556] 3 1 2 1 1 1 1 1 3 3 3 2 1 3 2 2 2 3 1 3 2 2 2 2 3 3 3 3 2 3 1 2 1 3 2 1 1
-[593] 1 1 3 3 3 3 1 1
+  [1] 2 3 2 3 2 2 1 2 2 1 3 1 3 2 1 1 2 2 2 2 1 1 3 2 3 2 2 2 2 3 3 1 3 3 2 2 3
+ [38] 3 2 3 2 1 2 3 2 1 3 2 3 2 1 3 2 2 3 3 2 1 2 2 3 3 1 1 1 1 1 2 3 3 1 2 2 1
+ [75] 3 1 1 3 1 2 2 2 3 3 2 1 1 3 2 3 1 1 3 1 3 3 2 2 2 1 2 3 2 1 2 2 2 2 3 1 2
+[112] 2 2 1 3 3 1 2 2 1 3 2 2 3 2 1 1 2 3 2 1 2 1 3 2 2 2 2 3 1 2 2 3 2 2 1 3 3
+[149] 1 1 1 2 1 3 1 3 1 2 1 1 1 1 2 1 2 1 2 3 2 1 1 3 3 3 3 2 3 1 3 2 1 2 3 2 2
+[186] 2 3 1 2 2 1 3 2 2 2 2 1 3 1 2 2 2 2 3 1 3 2 2 2 2 2 3 3 1 2 2 2 1 2 2 2 1
+[223] 2 2 2 1 1 2 2 2 2 3 3 2 2 1 1 1 1 2 2 2 2 1 1 2 3 1 3 1 2 1 1 1 2 2 2 2 3
+[260] 2 1 3 3 2 2 1 3 3 3 2 3 2 2 3 3 2 1 3 1 3 2 3 1 1 2 2 2 2 1 2 2 1 1 2 3 3
+[297] 1 2 2 3 3 2 1 3 3 3 3 1 2 3 2 2 2 2 3 3 1 2 2 2 2 1 3 1 3 2 2 1 2 2 1 3 3
+[334] 1 3 3 2 2 2 2 2 2 1 3 2 2 1 2 1 1 2 1 1 2 2 3 2 3 2 1 3 3 3 3 3 2 3 2 1 1
+[371] 2 1 3 2 2 1 2 2 2 3 2 3 3 1 2 3 3 2 1 1 1 2 2 2 3 2 3 2 2 2 2 1 3 3 1 2 1
+[408] 2 2 1 3 3 3 3 2 1 3 1 1 2 3 1 3 2 3 1 2 1 3 3 2 3 2 1 1 1 3 2 2 2 2 1 2 2
+[445] 1 2 1 2 2 2 2 2 2 2 3 3 3 2 1 2 3 3 3 3 3 3 1 3 2 2 3 1 2 3 2 2 2 2 3 3 2
+[482] 1 2 1 2 2 2 2 1 1 3 2 2 1 2 3 3 1 3 1 3 2 1 3 2 1 2 2 1 2 3 2 1 3 1 2 2 3
+[519] 2 2 1 2 3 3 3 1 2 3 3 3 2 2 2 2 3 3 1 2 2 3 1 2 3 1 1 3 1 2 3 1 2 1 1 2 1
+[556] 3 2 1 2 2 2 2 2 3 3 3 1 2 3 1 1 1 3 2 3 1 1 1 1 3 3 3 3 1 3 2 1 2 3 1 2 2
+[593] 2 2 3 3 3 3 2 2
 \end{verbatim}
 
 \begin{Shaded}
@@ -641,8 +622,8 @@ Description de l'algorithme d'Hartigan-Wong pour la méthode des kmeans.
    cluster3$cluster
 cl    1   2   3
   1   0   0 177
-  2 227  10   0
-  3  33 153   0
+  2  10 227   0
+  3 153  33   0
 \end{verbatim}
 
 \begin{Shaded}
