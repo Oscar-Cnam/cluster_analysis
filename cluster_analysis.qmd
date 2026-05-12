@@ -1,16 +1,23 @@
 ---
 title: "Clustering"
 author: "Arsène MBABEH - Raphaël PÉNÉ - Oscar JOSEPH--GENESLAY"
-number-sections: true
 format:
   pdf:
-    template: template.tex
+    template: template.tex # Assurez-vous que le nom correspond à votre fichier LaTeX
     pdf-engine: xelatex
+    cite-method: biblatex
+    keep-tex: true
+    include-in-header: 
+      text: |
+        \makeatletter
+        \@ifundefined{c@none}{\newcounter{none}}{}
+        \makeatother
+number-sections: true
 toc: false
-css: style.css
 lang: fr
 editor: visual
 bibliography: references.bib
+biblio-style: apa
 ---
 
 # L'article
@@ -36,6 +43,7 @@ library(factoextra)
 library(NbClust)
 library(mclust)
 library(kableExtra)
+library(kStatistics)
 ```
 
 # Création d'une simulation de données
@@ -187,7 +195,7 @@ as_tibble(X) %>% ggplot(aes(x = V1, y=V2)) +
   theme_classic() + 
   xlab("X") + 
   ylab("Y") +
-  ggtitle("Répartition des points simulés en fonction de leur groupe") +
+  ggtitle("Répartition des points simulés en fonction \n de leur groupe") +
   theme(plot.title = element_text(hjust = 0.5, size = 14, face = "bold")) -> graph1
 graph1
 ```
@@ -239,11 +247,13 @@ for(i in 1:600){
 
 # Merging the variables into our complete mixed-mode dataset, vars
 vars = cbind(X, c1, c2, c3, c4)
-head(vars)
+head(vars) %>% kable()
 
 ```
 
 ## Visualisation de la fréquence des modalités
+
+Nous représentons les variables discrètes avec le graphique à barres suivant, pour distinguer visuellement la proportion des modalités des variables discrètes par groupe. 
 
 ```{r}
 #| echo: false
@@ -261,37 +271,56 @@ ggplot(df_plot, aes(x = cl, fill = valeur)) +
   # Séparation par groupe (c1, c2, c3, c4)
   facet_grid(~ groupe) + scale_fill_manual(values = c("grey30", "grey65", "grey90"))+
   theme_classic()+
-  ggtitle("Fréquence des modalités dans chaque groupe et variable des données")
+  ggtitle("Fréquence des modalités des variables \n discrètes par groupe")+
+  xlab("Groupe")+
+  ylab("Fréquence")+
+  theme(plot.title = element_text(hjust = 0.5, size = 14, face = "bold"))
 ```
 
-### Application de la fonction k-means
+# Le clustering
 
-On aurait pu explorer toutes les possiblités pour 2 clusters mais c'est impossible vu le nombre de possibilités
+## Application de la fonction k-means
+
+Nous aurions pu explorer toutes les possiblités pour 2 clusters une par une à la main, mais c'est impossible vu le nombre de possibilités pour 600 observations. Il faudrait effectuer la démarche le nombre de fois ci-dessous :
 
 ```{r}
-library(kStatistics)
+#| echo: false
 nStirling2(600, 2)
 ```
 
 ## Méthode du coude
 
+La méthode du coude sert définir visuellement le nombre optimal de clusters afin de conserver le plus d'information possible. Nous devons nous arrêter au moment où l'inertie ne chute plus de manière significative.
+
+Dans le graphique ci-dessous, le coude commence à se former à partir du cluster $k = 3$. Nous conservons donc que 3 clusters.
+
 ```{r}
+#| echo: false
 # Elbow method
-fviz_nbclust(vars [,1:2], kmeans, method = "wss") +
+fviz_nbclust(vars[,1:2], kmeans, method = "wss") +
     geom_vline(xintercept = 3, linetype = 2)+
   labs(subtitle = "Méthode du coude - Nombre optimal de clusters") 
 ```
 
+La méthode du coude est performante pour trouver le nombre de cluster optimal mais reste très dépendante de notre interprétation. 
+
+Dans la méthode ci-dessous, la méthode "Gap statistic", le nombre optimal de clusters $k$ est celui qui donne le Gap le plus grand. C'est une méthode plus mathématique et souvent plus robuste que la méthode du coude visuelle.
+
+Elle compare la dispersion intra-cluster observée dans les données à l'espérance mathématique de cette dispersion générée sous une distribution uniforme de référence (hypothèse nulle d'absence de clusters). Le $k$ optimal est la valeur qui maximise cet écart.
+
+Avec cette méthode, on détecte automatiquement que le nombre de clusters optimal est $k = 3$.
+
 ```{r}
+#| echo: false
 fviz_nbclust(vars [,1:2], kmeans, nstart = 25, method = "gap_stat", nboot = 50)+
 labs(subtitle = "Gap statistic method") 
 ```
 
-### kmeans - Hartigan
+# Méthode des kmeans - algorithme d'Hartigan-Wong
 
-**Algo d'Hartigan**
+## L'algorithme d'Hartigan
 
-Description de l'algorithme d'Hartigam pour la méthode des kmeans.
+Description de l'algorithme d'Hartigan-Wong pour la méthode des kmeans.
 
 $$\begin{array}{l}
 \textbf{Algorithme de Hartigan-Wong (K-Means)} \\
@@ -541,4 +570,11 @@ plot(m1)
 #table(cl, m1$class)
 ```
 
+
+
+
 # Bibliographie
+
+
+
+
